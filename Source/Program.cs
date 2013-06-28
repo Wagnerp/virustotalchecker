@@ -37,6 +37,22 @@ namespace totalviruschecker
                     return;
                 }
 
+                string databasePath = string.Empty;
+                if (_options.Database.Length > 0)
+                {
+                    databasePath = _options.Database;
+                }
+                else
+                {
+                    databasePath = Misc.GetApplicationDirectory();
+                }
+
+                if (_options.Import.Length > 0)
+                {
+                    PerformImport(databasePath);
+                    return;
+                }
+
                 _settings = new Settings();
                 string ret = _settings.Load();
                 if (ret.Length > 0)
@@ -48,6 +64,12 @@ namespace totalviruschecker
                 if (_settings.ApiKey.Length == 0)
                 {
                     Console.WriteLine("The API key has not been set in the settings file");
+                    return;
+                }
+
+                if (_options.Output.Length == 0)
+                {
+                    Console.WriteLine("The output parameter must be set");
                     return;
                 }
 
@@ -63,27 +85,31 @@ namespace totalviruschecker
                     return;
                 }
 
-                CacheChecker cacheChecker = new CacheChecker(_settings.ApiKey, Misc.GetApplicationDirectory());
+                if (_options.File.Length > 0)
+                {
+                    if (File.Exists(_options.File) == false)
+                    {
+                        Console.WriteLine("The input file does not exist");
+                        return;
+                    }
+                }
+
+                CacheChecker cacheChecker = new CacheChecker(_settings.ApiKey, databasePath);
                 cacheChecker.HashChecked += OnCacheChecker_HashChecked;
                 cacheChecker.Complete += OnCacheChecker_Complete;
                 cacheChecker.Error += OnCacheChecker_Error;
 
-                if (_options.Output.Length > 0)
-                {
-                    if (File.Exists(_options.Output) == false)
-                    {
-                        IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}" + Environment.NewLine, GetDelimiter(), "MD5", "Positives", "Total"), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), false);
-                    }
-                }
+                // Output the CSV file header
+                IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}" + Environment.NewLine, GetDelimiter(), "MD5", "SHA256", "Positive", "Total"), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), false);
 
                 if (_options.File.Length > 0)
                 {
                     List<string> hashes = File.ReadAllLines(_options.File).Cast<string>().ToList();
-                    cacheChecker.Start(hashes);
+                    cacheChecker.Start(hashes, _options.Live);
                 }
                 else
                 {
-                    cacheChecker.Start(_options.Hash);
+                    cacheChecker.Start(_options.Hash, _options.Live);
                 }
 
                 _reset = new ManualResetEvent(false);
@@ -112,6 +138,22 @@ namespace totalviruschecker
             }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="databasePath"></param>
+        private static void PerformImport(string databasePath)
+        {
+            CacheChecker cacheChecker = new CacheChecker(string.Empty, databasePath);
+            cacheChecker.ImportComplete += OnCacheChecker_ImportComplete;
+            cacheChecker.Error += OnCacheChecker_Error;
+
+            cacheChecker.Import(_options.Import);
+
+            _reset = new ManualResetEvent(false);
+            _reset.WaitOne();
+        }
+
         #region Cache Checker Event Handlers
         /// <summary>
         /// 
@@ -120,6 +162,15 @@ namespace totalviruschecker
         private static void OnCacheChecker_Error(string message)
         {
             Console.WriteLine(message);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static void OnCacheChecker_ImportComplete()
+        {
+            Console.WriteLine("Import complete");
+            _reset.Set();
         }
 
         /// <summary>
@@ -139,15 +190,15 @@ namespace totalviruschecker
         {
             if (report.Total == 0)
             {
-                IO.WriteTextToFile(report.Md5 + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
-                Console.WriteLine("Failed: " + report.Md5);
+                IO.WriteTextToFile(string.Format("{0}{1}{2}", report.Resource, GetDelimiter(), report.VerboseMsg) + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                Console.WriteLine(string.Format("{0}: {1}", report.Resource, report.VerboseMsg));
             }
             else
             {
                 Console.WriteLine(report.Md5 + ": " + report.Positives + "/" + report.Total);
                 if (_options.Output.Length > 0)
                 {
-                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}" + Environment.NewLine, GetDelimiter(), report.Md5, report.Positives, report.Total), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
+                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}" + Environment.NewLine, GetDelimiter(), report.Md5, report.Sha256, report.Positives, report.Total), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
                 }
             }
         }

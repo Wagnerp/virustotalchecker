@@ -12,17 +12,23 @@ namespace totalviruschecker
         [Option("f", "file", Required = false, DefaultValue = "", HelpText = "File containing hashes")]
         public string File { get; set; }
 
-        [Option("t", "type", Required = true, DefaultValue = "md5", HelpText = "Valid values are md5 or sha1")]
-        public string Type { get; set; }
-
-        [Option("h", "hash", Required = false, DefaultValue = "", HelpText = "A single MD5 hash")]
+        [Option("h", "hash", Required = false, DefaultValue = "", HelpText = "A single hash")]
         public string Hash { get; set; }
 
         [Option("d", "delimiter", Required = false, DefaultValue = ",", HelpText = "The delimiter used for the export. Defaults to \",\"")]
         public string Delimiter { get; set; }
 
-        [Option("o", "output", Required = true, DefaultValue = "", HelpText = "Output directory")]
+        [Option("o", "output", Required = false, DefaultValue = "", HelpText = @"Output directory (use ""."" for the current dir)")]
         public string Output { get; set; }
+
+        [Option("b", "database", Required = false, DefaultValue = "", HelpText = @"Path to directory containing database (vt.db)")]
+        public string Database { get; set; }
+
+        [Option("l", "live", Required = false, DefaultValue = false, HelpText = @"Ignore database e.g. don't lookup, just request every hash from VT")]
+        public bool Live { get; set; }
+
+        [Option("i", "import", Required = false, DefaultValue = "", HelpText = @"Import JSON file e.g. convert virustotal-search pickle file to JSON then import")]
+        public string Import { get; set; }
 
         [HelpOption]
         public string GetUsage()

@@ -14,6 +14,7 @@ The tool requires an API key from Virus Total. Once you have a valid key then ad
 
 ## Third Party Libraries ##
 - [CommandLine](https://github.com/gsscoder/commandline): Used for command line parsing
+- [JSON.Net](http://json.codeplex.com/): JSON library for importing a virustotal-search pickle file
 - [MS SQL CE](http://www.microsoft.com/en-us/download/details.aspx?id=30709) : Access to MS SQL CE session database
 - [NPoco](https://github.com/schotime/NPoco) : Easy access to SQL CE data
 - [Utility](http://www.woanware.co.uk) (woanware) : My helper library

@@ -44,10 +44,6 @@
     <Reference Include="Utility">
       <HintPath>..\Dependencies\woanware\Utility.dll</HintPath>
     </Reference>
-    <Reference Include="VirusTotal.NET, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dependencies\VirusTotal.NET\VirusTotal.NET.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Options.cs" />
@@ -57,6 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Libraries\VirusTotal.NET\VirusTotal.NET\VirusTotal.NET.csproj">
+      <Project>{f171fb32-c071-4a38-ba05-61dd8b73723a}</Project>
+      <Name>VirusTotal.NET</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
