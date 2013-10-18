@@ -100,7 +100,7 @@ namespace totalviruschecker
                 cacheChecker.Error += OnCacheChecker_Error;
 
                 // Output the CSV file header
-                IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}" + Environment.NewLine, GetDelimiter(), "MD5", "SHA256", "Positive", "Total"), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), false);
+                IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}" + Environment.NewLine, GetDelimiter(), "MD5", "SHA256", "Positive", "Total", "DETECTED"), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), false);
 
                 if (_options.File.Length > 0)
                 {
@@ -195,10 +195,32 @@ namespace totalviruschecker
             }
             else
             {
-                Console.WriteLine(report.Md5 + ": " + report.Positives + "/" + report.Total);
+                string mse = string.Empty;
+                try
+                {
+                    var mseScan = (from s in report.Scans where s.Name.ToLower() == "microsoft" select s).SingleOrDefault();
+                    if (mseScan != null)
+                    {
+                        if (mseScan.Result != null)
+                        {
+                            mse = mseScan.Result;
+                        }
+                    }
+                }
+                catch (Exception) { }
+                
+                if (mse.Length > 0)
+                {
+                    Console.WriteLine(report.Md5 + ": " + report.Positives + "/" + report.Total + " (" + mse + ")");
+                }
+                else
+                {
+                    Console.WriteLine(report.Md5 + ": " + report.Positives + "/" + report.Total);
+                }
+                
                 if (_options.Output.Length > 0)
                 {
-                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}" + Environment.NewLine, GetDelimiter(), report.Md5, report.Sha256, report.Positives, report.Total), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
+                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}" + Environment.NewLine, GetDelimiter(), report.Md5, report.Sha256, report.Positives, report.Total, mse), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
                 }
             }
         }
