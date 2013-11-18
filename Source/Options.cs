@@ -24,8 +24,8 @@ namespace totalviruschecker
         [Option("b", "database", Required = false, DefaultValue = "", HelpText = @"Path to directory containing database (vt.db)")]
         public string Database { get; set; }
 
-        [Option("l", "live", Required = false, DefaultValue = false, HelpText = @"Ignore database e.g. don't lookup, just request every hash from VT")]
-        public bool Live { get; set; }
+        [Option("m", "mode", Required = true, DefaultValue = "c", HelpText = @"Mode e.g. c = caching, d = database only, l = live")]
+        public string Mode { get; set; }
 
         [Option("i", "import", Required = false, DefaultValue = "", HelpText = @"Import JSON file e.g. convert virustotal-search pickle file to JSON then import")]
         public string Import { get; set; }

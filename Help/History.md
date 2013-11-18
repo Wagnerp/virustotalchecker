@@ -1,5 +1,13 @@
 # History #
 
+**v1.1.0**
+
+- Modified to perform multiple hash checks at once e.g. 4
+- Updated the file mode to work on any size file
+- Modified to store all positive scan results
+- Modified command line parameters to include "m" mode option e.g. c=caching, d=database, l=live. This means that the "l" live command line parameter has been removed
+- Modified database structure to hold the date the record was inserted into the database. This allows the record to "expire" after 30 days 
+
 **v1.0.5**
 
 - Modified to store and output the result of the Microsoft (Security Essentials) scan
