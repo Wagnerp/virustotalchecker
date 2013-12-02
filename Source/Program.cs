@@ -68,10 +68,21 @@ namespace totalviruschecker
                     return;
                 }
 
-                if (_options.Output.Length == 0)
+                Global.Mode mode = Global.Mode.Cache;
+                switch (_options.Mode.ToLower())
                 {
-                    Console.WriteLine("The output parameter must be set");
-                    return;
+                    case "c":
+                        mode = Global.Mode.Cache;
+                        break;
+                    case "d":
+                        mode = Global.Mode.Database;
+                        break;
+                    case "l":
+                        mode = Global.Mode.Live;
+                        break;
+                    default:
+                        Console.WriteLine("Invalid mode e.g. c = caching, d = database only, l = live");
+                        return;
                 }
 
                 if (_options.File.Length == 0 & _options.Hash.Length == 0)
@@ -86,27 +97,19 @@ namespace totalviruschecker
                     return;
                 }
 
-                if (_options.File.Length > 0)
+                if (_options.File.Trim().Length > 0)
                 {
+                    if (_options.Output.Length == 0)
+                    {
+                        Console.WriteLine("The output parameter must be set");
+                        return;
+                    }
+
                     if (File.Exists(_options.File) == false)
                     {
                         Console.WriteLine("The input file does not exist");
                         return;
                     }
-                }
-
-                Global.Mode mode = Global.Mode.Cache;
-                switch (_options.Mode.ToLower())
-                {
-                    case "c":
-                        mode = Global.Mode.Cache;
-                        break;
-                    case "d":
-                        mode = Global.Mode.Database;
-                        break;
-                    case "l":
-                        mode = Global.Mode.Live;
-                        break;
                 }
 
                 CacheChecker cacheChecker = new CacheChecker(_settings.ApiKey, databasePath);
@@ -210,10 +213,14 @@ namespace totalviruschecker
         private static void OnCacheChecker_HashChecked(Hash hash)
         {
             _count++;
+
             if (hash.Total == 0)
             {
-
-                IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Not in VT data") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                if (_options.Output.Length > 0)
+                {
+                    IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Not in VT data") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                }
+                
                 Console.WriteLine(string.Format("{0}: Not in VT data", hash.Md5));
             }
             else
@@ -226,12 +233,13 @@ namespace totalviruschecker
                 {
                     Console.WriteLine(hash.Md5 + ": " + hash.Positive + "/" + hash.Total);
                 }
-                
+
                 if (_options.Output.Length > 0)
                 {
                     IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}" + Environment.NewLine, GetDelimiter(), hash.Md5, hash.Sha256, hash.Positive, hash.Total, hash.Scans), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
                 }
             }
+            
         }
         #endregion
     }

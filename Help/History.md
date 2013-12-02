@@ -1,5 +1,14 @@
 # History #
 
+**v1.1.2**
+
+- Fixed a null exception in the Checker object when checks are performed before the Checker object can be initialised. Thanks RussellH
+- Modified the command line parameters so that you don't need to specify an output parameter if requesting a single hash e.g. single hash outputs to console only. Thanks RussellH
+
+**v1.1.1**
+
+- Fixed bug in the live mode where not all checks were live
+
 **v1.1.0**
 
 - Modified to perform multiple hash checks at once e.g. 4
