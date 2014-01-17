@@ -112,7 +112,7 @@ namespace totalviruschecker
                     }
                 }
 
-                CacheChecker cacheChecker = new CacheChecker(_settings.ApiKey, databasePath);
+                CacheChecker cacheChecker = new CacheChecker(_settings.ApiKey, databasePath, _settings.Proxy);
                 cacheChecker.HashChecked += OnCacheChecker_HashChecked;
                 cacheChecker.Complete += OnCacheChecker_Complete;
                 cacheChecker.Error += OnCacheChecker_Error;
@@ -165,7 +165,7 @@ namespace totalviruschecker
         /// <param name="databasePath"></param>
         private static void PerformImport(string databasePath)
         {
-            CacheChecker cacheChecker = new CacheChecker(string.Empty, databasePath);
+            CacheChecker cacheChecker = new CacheChecker(string.Empty, databasePath, string.Empty);
             cacheChecker.ImportComplete += OnCacheChecker_ImportComplete;
             cacheChecker.Error += OnCacheChecker_Error;
 
@@ -182,6 +182,13 @@ namespace totalviruschecker
         /// <param name="message"></param>
         private static void OnCacheChecker_Error(string message)
         {
+            if (System.IO.Directory.Exists(Misc.GetUserDataDirectory()) == false)
+            {
+                System.IO.Directory.CreateDirectory(Misc.GetUserDataDirectory());
+            }
+
+            IO.WriteTextToFile(DateTime.Now.ToString("s") + ":" + message + Environment.NewLine, System.IO.Path.Combine(Misc.GetUserDataDirectory(), "Errors.txt"), true); 
+
             Console.WriteLine(message);
         }
 
@@ -218,10 +225,36 @@ namespace totalviruschecker
             {
                 if (_options.Output.Length > 0)
                 {
-                    IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Not in VT data") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                    switch (hash.Response)
+                    {
+                        case -2: // Still queued for analysis
+                            IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Queued") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                            break;
+                        case -1: // Error
+                            IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Error") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                            break;
+                        case 0: // Not present in dataset
+                            IO.WriteTextToFile(string.Format("{0}{1}{2}", hash.Md5, GetDelimiter(), "Not in VT data") + Environment.NewLine, System.IO.Path.Combine(_options.Output, "Failed.csv"), true);
+                            break;
+                        case 1: // Was identified in dataset (Should never happen here!)
+                            break;
+                    }
                 }
-                
-                Console.WriteLine(string.Format("{0}: Not in VT data", hash.Md5));
+
+                switch (hash.Response)
+                {
+                    case -2: // Still queued for analysis
+                        Console.WriteLine(string.Format("{0}: Queued", hash.Md5));
+                        break;
+                    case -1: // Error
+                        Console.WriteLine(string.Format("{0}: Error", hash.Md5));
+                        break;
+                    case 0: // Not present in dataset
+                        Console.WriteLine(string.Format("{0}: Not in VT data", hash.Md5));
+                        break;
+                    case 1: // Was identified in dataset (Should never happen here!)
+                        break;
+                }
             }
             else
             {
@@ -236,7 +269,7 @@ namespace totalviruschecker
 
                 if (_options.Output.Length > 0)
                 {
-                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}" + Environment.NewLine, GetDelimiter(), hash.Md5, hash.Sha256, hash.Positive, hash.Total, hash.Scans), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
+                    IO.WriteTextToFile(string.Format("{1}{0}{2}{0}{3}{0}{4}{0}{5}{0}{6}" + Environment.NewLine, GetDelimiter(), hash.Md5, hash.Sha256, hash.Positive, hash.Total, hash.Permalink, hash.Scans), System.IO.Path.Combine(_options.Output, "virustotalchecker.csv"), true);
                 }
             }
             

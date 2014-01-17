@@ -1,5 +1,19 @@
 # History #
 
+**v1.1.4**
+
+- Updated RestSharp library to 104.2
+- Added Proxy configuration to the Settings.xml file so you can define the proxy like so: http://192.168.0.1:8080
+
+**v1.1.3**
+
+- Fixed bug where an exception occurring in the VT library could cause the overall process to stop
+- Modified the CSV output to include the permalink URL
+- Modified the error handling in Checker.cs to log hashes where an error occurred
+- Modified the error handling in Checker.cs to include a timeout to ensure that the ToS are not broken
+- Modified the Hash.Response (VirusTotal.NET) property from byte to short as the API can return -2 if a resource is queued for scanning
+- Modified the CacheChecker.ProcessFile to include more error handling
+
 **v1.1.2**
 
 - Fixed a null exception in the Checker object when checks are performed before the Checker object can be initialised. Thanks RussellH

@@ -13,7 +13,7 @@ namespace totalviruschecker
     {
         #region Member Variables
         public string ApiKey {get;set;}
-        public int Pause { get; set; }
+        public string Proxy { get; set; }
         private const string FILENAME = "Settings.xml";
         #endregion
 
@@ -24,7 +24,7 @@ namespace totalviruschecker
         public Settings()
         {
             ApiKey = string.Empty;
-            Pause = 16;
+            Proxy = string.Empty;
         }
         #endregion
 
@@ -51,7 +51,7 @@ namespace totalviruschecker
                 {
                     Settings settings = (Settings)serializer.Deserialize(stream);
                     ApiKey = settings.ApiKey;
-                    Pause = settings.Pause;
+                    Proxy = settings.Proxy;
                     return string.Empty;
                 }
             }
